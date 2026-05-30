@@ -18,6 +18,8 @@ def get_heading_from_html(html):
 def get_first_paragraph_from_html(html):
 	result = "" # default return empty string
 	soup = BeautifulSoup(html, 'html.parser')
-	if soup.p:
+	if soup.main and soup.main.p:
+		result = soup.main.p.string
+	elif soup.p:
 		result = soup.p.string
 	return result

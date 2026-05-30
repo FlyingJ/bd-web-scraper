@@ -20,7 +20,10 @@ get_heading_from_html_test_cases = [
 ]
 
 get_first_paragraph_from_html_test_cases = [
+	("""<html><body><p>A</p></body></html>""", "A"),
+	("""<html><body><p>A</p><main><p>B</p></main></body></html>""", "B"),
 	("""<html><body><p>Outside paragraph.</p><main><p>Main paragraph.</p></main></body></html>""", "Main paragraph."),
+	("""<html><body></body></html>""", ""),
 ]
 
 class TestCrawl(unittest.TestCase):
