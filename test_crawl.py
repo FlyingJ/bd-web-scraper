@@ -14,6 +14,9 @@ normalize_url_test_cases = [
 get_heading_from_html_test_cases = [
 	("""<html><body><h1>Welcome to Boot.dev</h1><main><p>Learn to code by building real projects.</p><p>This is the second paragraph.</p></main></body></html>""", "Welcome to Boot.dev"),
 	("""<html><body><h1>Test Title</h1></body></html>""", "Test Title"),
+	("""<html><body><p>Some text</p><h2>Test Title</h2></body></html>""", "Test Title"),
+	("""<html><body></body></html>""", ""),
+	("""<html><body><p>text</p></body></html>""", ""),
 ]
 
 get_first_paragraph_from_html_test_cases = [

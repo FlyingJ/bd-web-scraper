@@ -8,7 +8,16 @@ def normalize_url(url):
 
 def get_heading_from_html(html):
 	result = "" # default return empty string
+	soup = BeautifulSoup(html, 'html.parser')
+	if soup.h1:
+		result = soup.h1.string
+	elif soup.h2:
+		result = soup.h2.string
 	return result
 
 def get_first_paragraph_from_html(html):
-	return None
+	result = "" # default return empty string
+	soup = BeautifulSoup(html, 'html.parser')
+	if soup.p:
+		result = soup.p.string
+	return result
