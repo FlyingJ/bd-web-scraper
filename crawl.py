@@ -23,3 +23,12 @@ def get_first_paragraph_from_html(html):
 	elif soup.p:
 		result = soup.p.string
 	return result
+
+def get_urls_from_html(html, base_url):
+	result = []
+	soup = BeautifulSoup(html, 'html.parser')
+	for url in soup.a['href']:
+		result.extend(url)
+	for url in soup.img['src']:
+		result.extend(url)
+	return result
