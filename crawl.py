@@ -24,12 +24,9 @@ def get_first_paragraph_from_html(html):
 		result = soup.p.string
 	return result
 
-def get_urls_from_html(html, base_url):
+def get_images_from_html(html, base_url):
 	result = []
 	soup = BeautifulSoup(html, 'html.parser')
-	for link in soup.find_all('a'):
-		# print(f'{link} -> {link['href']}')
-		result.append(link['href'])
 	for image in soup.find_all('img'):
 		raw_image_src = image['src']
 		if raw_image_src.startswith('http'):
@@ -39,3 +36,11 @@ def get_urls_from_html(html, base_url):
 		# print(f'{image} -> {image_path}')
 		result.append(image_path)
 	return result
+
+def get_urls_from_html(html, base_url):
+	result = []
+	soup = BeautifulSoup(html, 'html.parser')
+	for link in soup.find_all('a'):
+		# print(f'{link} -> {link['href']}')
+		result.append(link['href'])
+	return result + get_images_from_html(html, base_url)

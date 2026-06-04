@@ -34,6 +34,14 @@ get_urls_from_html_test_cases = [
 	(("""<html><body><a href="https://crawler-test.com">Go to Boot.dev</a><img src="/logo.png" alt="Boot.dev Logo" /></body></html>""", "https://example.com/"), ["https://crawler-test.com", "https://example.com/logo.png"]),
 ]
 
+get_images_from_html_test_cases = [
+	(("""<html><body></body></html>""", "https://www.example.com/"), []),
+	(("""<html><body></body></html>""", ""), []),
+	(("""""", "https://www.example.com/"), []),
+	(("""""", ""), []),
+	(("""<html><body><a href="https://crawler-test.com">Go to Boot.dev</a><img src="/logo.png" alt="Boot.dev Logo" /></body></html>""", "https://example.com/"), ["https://example.com/logo.png"]),
+]
+
 class TestCrawl(unittest.TestCase):
 	def test_normalize_url(self):
 		for text, expectation in normalize_url_test_cases: 
@@ -53,6 +61,11 @@ class TestCrawl(unittest.TestCase):
 	def test_get_urls_from_html(self):
 		for ((html, base_url), expectation) in get_urls_from_html_test_cases:
 			result = crawl.get_urls_from_html(html, base_url)
+			self.assertEqual(result, expectation)
+
+	def test_get_images_from_html(self):
+		for ((html, base_url), expectation) in get_images_from_html_test_cases:
+			result = crawl.get_images_from_html(html, base_url)
 			self.assertEqual(result, expectation)
 
 if __name__ == "__main__":
