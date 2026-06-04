@@ -27,10 +27,10 @@ get_first_paragraph_from_html_test_cases = [
 ]
 
 get_urls_from_html_test_cases = [
-	(("""<html><body></body></html>""", "https://www.example.com/"), ""),
-	(("""<html><body></body></html>""", ""), ""),
-	(("""""", "https://www.example.com/"), ""),
-	(("""""", ""), ""),
+	(("""<html><body></body></html>""", "https://www.example.com/"), []),
+	(("""<html><body></body></html>""", ""), []),
+	(("""""", "https://www.example.com/"), []),
+	(("""""", ""), []),
 	(("""<html><body><a href="https://crawler-test.com">Go to Boot.dev</a><img src="/logo.png" alt="Boot.dev Logo" /></body></html>""", "https://example.com/"), ["https://crawler-test.com", "https://example.com/logo.png"]),
 ]
 

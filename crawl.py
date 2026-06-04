@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup, Tag
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 def normalize_url(url):
 	url_obj = urlparse(url)
@@ -27,8 +27,15 @@ def get_first_paragraph_from_html(html):
 def get_urls_from_html(html, base_url):
 	result = []
 	soup = BeautifulSoup(html, 'html.parser')
-	for url in soup.a['href']:
-		result.extend(url)
-	for url in soup.img['src']:
-		result.extend(url)
+	for link in soup.find_all('a'):
+		# print(f'{link} -> {link['href']}')
+		result.append(link['href'])
+	for image in soup.find_all('img'):
+		raw_image_src = image['src']
+		if raw_image_src.startswith('http'):
+			image_path = raw_image_src
+		else:
+			image_path = urljoin(base_url, raw_image_src)
+		# print(f'{image} -> {image_path}')
+		result.append(image_path)
 	return result
