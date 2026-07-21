@@ -1,13 +1,22 @@
 from bs4 import BeautifulSoup, Tag
+from typing import TypedDict
 from urllib.parse import urljoin, urlparse
 
-def extract_page_data(html: str, page_url: str) -> dict[str, str | list[str]]:
+class PageData(TypedDict):
+    url: str
+    heading: str
+    first_paragraph: str
+    outgoing_links: list[str]
+    image_urls: list[str]
+
+def extract_page_data(html: str, page_url: str) -> PageData:
+	base_url = normalize_url
 	return {
 		"url": normalize_url(page_url),
 		"heading": get_heading_from_html(html),
 		"first_paragraph": get_first_paragraph_from_html(html),
-		"outgoing_links": [],
-		"image_urls": []
+		"outgoing_links": get_urls_from_html(html, base_url),
+		"image_urls": get_images_from_html(html, base_url),
 	}
 
 def get_first_paragraph_from_html(html):
@@ -47,7 +56,7 @@ def get_urls_from_html(html, base_url):
 	for link in soup.find_all('a'):
 		# print(f'{link} -> {link['href']}')
 		result.append(link['href'])
-	return result + get_images_from_html(html, base_url)
+	return result
 
 def normalize_url(url):
 	url_obj = urlparse(url)
