@@ -10,9 +10,12 @@ class PageData(TypedDict):
     image_urls: list[str]
 
 def extract_page_data(html: str, page_url: str) -> PageData:
-	base_url = normalize_url
+	obj = urlparse(page_url)
+	base_url = f'{obj.scheme}://{obj.netloc}'
+	# print(f'Page URL: {page_url}')
+	# print(f'Base URL: {base_url}')
 	return {
-		"url": normalize_url(page_url),
+		"url": page_url,
 		"heading": get_heading_from_html(html),
 		"first_paragraph": get_first_paragraph_from_html(html),
 		"outgoing_links": get_urls_from_html(html, base_url),
@@ -38,25 +41,10 @@ def get_heading_from_html(html):
 	return result
 
 def get_images_from_html(html, base_url):
-	result = []
-	soup = BeautifulSoup(html, 'html.parser')
-	for image in soup.find_all('img'):
-		raw_image_src = image['src']
-		if raw_image_src.startswith('http'):
-			image_path = raw_image_src
-		else:
-			image_path = urljoin(base_url, raw_image_src)
-		# print(f'{image} -> {image_path}')
-		result.append(image_path)
-	return result
+	return [urljoin(base_url, image["src"]) for image in BeautifulSoup(html, 'html.parser').find_all('img')]
 
 def get_urls_from_html(html, base_url):
-	result = []
-	soup = BeautifulSoup(html, 'html.parser')
-	for link in soup.find_all('a'):
-		# print(f'{link} -> {link['href']}')
-		result.append(link['href'])
-	return result
+	return [urljoin(base_url, link["href"]) for link in BeautifulSoup(html, 'html.parser').find_all('a')]
 
 def normalize_url(url):
 	url_obj = urlparse(url)
