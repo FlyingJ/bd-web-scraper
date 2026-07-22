@@ -1,3 +1,5 @@
+import requests
+
 from bs4 import BeautifulSoup, Tag
 from typing import TypedDict
 from urllib.parse import urljoin, urlparse
@@ -50,3 +52,14 @@ def normalize_url(url):
 	url_obj = urlparse(url)
 	# print(url_obj)
 	return url_obj.netloc + url_obj.path.rstrip('/')
+
+def get_html(url):
+	headers = {
+		"User-Agent": "BootCrawler/1.0",
+	}
+	result = requests.get(url, headers=headers)
+	if result.status_code >= 400:
+		result.raise_on_status()
+	if not result.headers["content-type"].startswith("text/html"):
+		raise Exception(f'response has incorrect Content-Type: {result.headers["content-type"]}')
+	return result.text
