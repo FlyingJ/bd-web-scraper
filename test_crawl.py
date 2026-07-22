@@ -32,6 +32,9 @@ get_urls_from_html_test_cases = [
 	(("""""", "https://www.example.com/"), []),
 	(("""""", ""), []),
 	(("""<html><body><a href="https://crawler-test.com">Go to Boot.dev</a><img src="/logo.png" alt="Boot.dev Logo" /></body></html>""", "https://example.com/"), ["https://crawler-test.com", ]),
+	(("""<html><body><h1>Test Title</h1><p>This is the first paragraph.</p><a href="/link1">Link 1</a> <img src="/image1.jpg" alt="Image 1"> </body></html>""", "https://crawler-test.com"), ["https://crawler-test.com/link1", ]),
+	(("""<html><body><h1>Test Title</h1><p>This is the first paragraph.</p><a href="http://some.ai/thingy-for-the-masses/">Link 1</a> <img src="/image1.jpg" alt="Image 1"> </body></html>""", "https://crawler-test.com"), ["http://some.ai/thingy-for-the-masses/", ]),
+	(("""<html><body><h1>Test Title</h1><p>This is the first paragraph.</p><a href="http://some.ai/thingy-for-the-masses/">AI Link 1</a><a href="/Link1.html">Link 1</a> <img src="/image1.jpg" alt="Image 1"> </body></html>""", "https://crawler-test.com"), ["http://some.ai/thingy-for-the-masses/", "https://crawler-test.com/Link1.html", ]),
 ]
 
 get_images_from_html_test_cases = [
@@ -308,25 +311,28 @@ extract_page_data_test_cases = [
 		    "heading": "The Brutalist Report",
 		    "first_paragraph": "Do you feel it too? There's something wrong with the web.",
 		    "outgoing_links": [
-		        "https://brutalist.report/",
-		        "https://brutalist.report/topic/all",
-		        "https://brutalist.report/topic/tech?",
-		        "https://brutalist.report/topic/news?",
-		        "https://brutalist.report/topic/business?",
-		        "https://brutalist.report/topic/science?",
-		        "https://brutalist.report/topic/gaming?",
-		        "https://brutalist.report/topic/culture?",
-		        "https://brutalist.report/topic/politics?",
-		        "https://brutalist.report/topic/sports?",
-		        "https://brutalist.report/wordcloud?",
-		        "https://brutalist.report/summary",
-		        "https://brutalist.report/premium",
-		        "https://apps.apple.com/app/brutalist-report/id6756546583",
-		        "https://brutalist.mov",
-		        "https://brutalist.report/about",
-		        "https://brutalist.network",
-        		"https://benhoyt.com/writings/the-small-web-is-beautiful/",
-    		],
+				'https://brutalist.report/',
+				'https://brutalist.report/login',
+				'https://brutalist.report/',
+				'https://brutalist.report/topic/all',
+				'https://brutalist.report/topic/tech',
+				'https://brutalist.report/topic/news',
+				'https://brutalist.report/topic/business',
+				'https://brutalist.report/topic/science',
+				'https://brutalist.report/topic/gaming',
+				'https://brutalist.report/topic/culture',
+				'https://brutalist.report/topic/politics',
+				'https://brutalist.report/topic/sports',
+				'https://brutalist.report/wordcloud',
+				'https://brutalist.report/summary',
+				'https://brutalist.report/premium',
+				'https://apps.apple.com/app/brutalist-report/id6756546583',
+				'https://brutalist.mov',
+				'https://brutalist.report/about',
+				'https://brutalist.network',
+				'https://benhoyt.com/writings/the-small-web-is-beautiful/',
+				'https://brutalist.network',
+			],
     		"image_urls": [
         		"https://brutalist.report/public/new.gif",
     		],
@@ -376,8 +382,8 @@ class TestCrawl(unittest.TestCase):
 		self.assertNotEqual('Fred', 'Barney')
 
 	def test_extract_page_data(self):
-		for ((body, url), expectation) in extract_page_data_test_cases:
-			result = crawl.extract_page_data(body, url)
+		for ((html, url), expectation) in extract_page_data_test_cases:
+			result = crawl.extract_page_data(html, url)
 			self.assertEqual(result, expectation)
 
 if __name__ == "__main__":
