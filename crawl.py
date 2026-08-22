@@ -11,6 +11,11 @@ class PageData(TypedDict):
     outgoing_links: list[str]
     image_urls: list[str]
 
+def crawl_page(base_url: str, current_url: str = None, page_data: dict[str, PageData] = None) -> bool:
+	success = False
+	# do the crawling
+	return success
+
 def extract_page_data(html: str, page_url: str) -> PageData:
 	obj = urlparse(page_url)
 	base_url = f'{obj.scheme}://{obj.netloc}'
@@ -24,7 +29,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
 		"image_urls": get_images_from_html(html, base_url),
 	}
 
-def get_first_paragraph_from_html(html):
+def get_first_paragraph_from_html(html: str) -> str:
 	result = "" # default return empty string
 	soup = BeautifulSoup(html, 'html.parser')
 	if soup.main and soup.main.p:
@@ -33,7 +38,7 @@ def get_first_paragraph_from_html(html):
 		result = soup.p.string
 	return result
 
-def get_heading_from_html(html):
+def get_heading_from_html(html: str) -> str:
 	result = "" # default return empty string
 	soup = BeautifulSoup(html, 'html.parser')
 	if soup.h1:
@@ -42,18 +47,18 @@ def get_heading_from_html(html):
 		result = soup.h2.string
 	return result
 
-def get_images_from_html(html, base_url):
+def get_images_from_html(html: str, base_url: str) -> list[str]:
 	return [urljoin(base_url, image["src"]) for image in BeautifulSoup(html, 'html.parser').find_all('img')]
 
-def get_urls_from_html(html, base_url):
+def get_urls_from_html(html: str, base_url: str) -> list[str]:
 	return [urljoin(base_url, link["href"]) for link in BeautifulSoup(html, 'html.parser').find_all('a')]
 
-def normalize_url(url):
+def normalize_url(url: str) -> str:
 	url_obj = urlparse(url)
 	# print(url_obj)
 	return url_obj.netloc + url_obj.path.rstrip('/')
 
-def get_html(url):
+def get_html(url: str) -> str:
 	headers = {
 		"User-Agent": "BootCrawler/1.0",
 	}
