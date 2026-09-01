@@ -11,10 +11,29 @@ class PageData(TypedDict):
     outgoing_links: list[str]
     image_urls: list[str]
 
-def crawl_page(base_url: str, current_url: str = None, page_data: dict[str, PageData] = None) -> bool:
-	success = False
-	# do the crawling
-	return success
+def crawl_page(
+	base_url: str,
+	current_url: str = None,
+	site_data: dict[str, PageData] = None
+	) ->  dict[str, PageData]:
+	if not site_data:
+		site_data = {}
+	
+	if not current_url.startswith(base_url):
+		print(f"SKIP: {current_url} outside {base_url}")
+		return site_data
+
+	norm_current_url = normalize_url(current_url)
+	if norm_current_url not in site_data:
+		print(f"CACHE MISS: {norm_current_url}")
+		page_data = extract_page_data(get_html(current_url), current_url)
+		site_data[norm_current_url] = page_data
+		for link in page_data["outgoing_links"]:
+			print(f"FOUND ANOTHER PAGE: {link}")
+			site_data = crawl_page(base_url, link, site_data)
+	else:
+		print(f"CACHE HIT: {norm_current_url}")
+	return site_data
 
 def extract_page_data(html: str, page_url: str) -> PageData:
 	obj = urlparse(page_url)
@@ -55,7 +74,6 @@ def get_urls_from_html(html: str, base_url: str) -> list[str]:
 
 def normalize_url(url: str) -> str:
 	url_obj = urlparse(url)
-	# print(url_obj)
 	return url_obj.netloc + url_obj.path.rstrip('/')
 
 def get_html(url: str) -> str:
@@ -67,4 +85,5 @@ def get_html(url: str) -> str:
 		result.raise_on_status()
 	if not result.headers["content-type"].startswith("text/html"):
 		raise Exception(f'response has incorrect Content-Type: {result.headers["content-type"]}')
+	print(f"Fetched page: {url}")
 	return result.text

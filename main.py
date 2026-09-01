@@ -11,7 +11,9 @@ def main():
     else:
         url = sys.argv[-1]
         print(f"starting crawl of: {url}")
-        print(crawl.get_html(url))
+        site_data = crawl.crawl_page(url, url)
+        print(f"Found {len(site_data)} pages")
+        print(site_data)
 
 if __name__ == "__main__":
     main()
