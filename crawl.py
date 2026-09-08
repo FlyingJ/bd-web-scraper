@@ -1,8 +1,44 @@
+import aiohttp
+import asyncio
 import requests
 
 from bs4 import BeautifulSoup, Tag
 from typing import TypedDict
 from urllib.parse import urljoin, urlparse
+
+class AsyncCrawler():
+	def __init__(self, base_url, base_domain, max_concurrency):
+		self.base_url = base_url
+		self.base_domain = base_domain
+
+		self.site_data = {}
+		self.lock = asyncio.Lock()
+		self.max_concurrency = max_concurrency
+		self.semaphore = asyncio.Semaphore(max_concurrency)
+		self.session = None
+
+	async def __aenter__(self):
+		self.session = aiohttp.ClientSession()
+		return self
+
+	async def __aexit__(self, exc_type, exc_val, exc_tb):
+		await self.session.close()
+
+	async def add_page_visit(self,normalized_url):
+		async with self.lock:
+			return normalized_url not in self.site_data
+
+	async def get_html(self, url):
+		headers = {
+			"User-Agent": "BootCrawler/1.0",
+		}
+		async with self.session.get(url, headers=headers) as response:
+			if response.status >= 400:
+				raise Exception(f"HTTP error status: {response.status}")
+			if not response.headers["content-type"].startswith("text/html"):
+				raise Exception(f'response has incorrect Content-Type: {response.headers["content-type"]}')
+			print(f"Fetched page: {url}")
+			return await response.text()
 
 class PageData(TypedDict):
     url: str
