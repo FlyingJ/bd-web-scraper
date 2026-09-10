@@ -1,0 +1,97 @@
+serial
+
+real    0m15.614s
+user    0m4.004s
+sys 0m0.147s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_remain.sh  (Exit: 0)
+
+async - 1 task
+
+real    0m7.223s
+user    0m2.449s
+sys 0m0.067s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m6.205s
+user    0m2.298s
+sys 0m0.077s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m7.884s
+user    0m2.306s
+sys 0m0.074s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+async - 3 tasks
+
+real    0m3.016s
+user    0m1.465s
+sys 0m0.103s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m3.185s
+user    0m1.313s
+sys 0m0.068s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m3.543s
+user    0m1.495s
+sys 0m0.105s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+async - 5 tasks
+
+real    0m2.047s
+user    0m1.153s
+sys 0m0.059s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m1.915s
+user    0m1.067s
+sys 0m0.059s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m2.816s
+user    0m1.258s
+sys 0m0.071s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+async - 7 tasks
+
+real    0m1.663s
+user    0m1.075s
+sys 0m0.097s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m1.561s
+user    0m1.051s
+sys 0m0.056s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
+
+
+real    0m1.941s
+user    0m1.223s
+sys 0m0.095s
+jason@jacktor:~/Projects/github.com/FlyingJ/bd-web-scraper
+✔ time ./test_main.sh  (Exit: 0)
