@@ -4,17 +4,17 @@ import requests
 
 from bs4 import BeautifulSoup, Tag
 from typing import TypedDict
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlsplit
 
 class AsyncCrawler():
-	def __init__(self, base_url, base_domain, max_concurrency):
-		self.base_url = base_url
-		self.base_domain = base_domain
+	def __init__(self, url, max_concurrency=1):
+		self.base_url = url
+		self.base_domain = urlsplit(self.base_url).netloc
 
 		self.site_data = {}
 		self.lock = asyncio.Lock()
 		self.max_concurrency = max_concurrency
-		self.semaphore = asyncio.Semaphore(max_concurrency)
+		self.semaphore = asyncio.Semaphore(self.max_concurrency)
 		self.session = None
 
 	async def __aenter__(self):
@@ -27,11 +27,13 @@ class AsyncCrawler():
 	async def add_page_visit(self, normalized_url):
 		try:
 			if self.lock is None:
-				raise Exception('no lock allocated in AsyncCrawler object')
-			if not self.site_data:
-				raise Exception('no site data found in AsyncCrawler object')
+				raise Exception("no lock allocated in AsyncCrawler object")
 			async with self.lock:
-				return normalized_url not in self.site_data
+				if normalized_url not in self.site_data:
+					self.site_data[normalized_url] = {}
+					return True
+				else:
+					return False
 		except Exception as e:
 			print(f"Exception caught: {e}")
 			return None
@@ -55,6 +57,45 @@ class AsyncCrawler():
 		except Exception as e:
 			print(f"Exception caught: {e}")
 			return None
+
+	async def crawl_page(self, current_url: str = None):
+		try:
+			if current_url is None:
+				print("ODD: current_url is None")
+				return
+			if not urlsplit(current_url).netloc == self.base_domain:
+				print(f"SKIP: {urlsplit(current_url).netloc} not in {self.base_domain}")
+				return
+			normalized_url = normalize_url(current_url)
+			if not await self.add_page_visit(normalized_url):
+				return
+
+			async with self.semaphore:
+				html = await self.get_html(current_url)
+			
+			if html is None:
+				return
+			page_data = extract_page_data(html, current_url)
+
+			async with self.lock:
+				self.site_data[normalized_url] = page_data
+			
+			tasks = set()
+			for url in page_data["outgoing_links"]:
+				task = asyncio.create_task(self.crawl_page(url))
+				tasks.add(task)
+			if tasks:
+				await asyncio.gather(*tasks)
+		except Exception as e:
+			print(f"Exception in AsyncCrawler.crawl_page(): {e}")
+
+	async def crawl(self):
+		await self.crawl_page(self.base_url)
+		return self.site_data
+
+async def crawl_site_async(url):
+	async with AsyncCrawler(url) as crawler:
+		return await crawler.crawl()
 
 class PageData(TypedDict):
     url: str
@@ -102,7 +143,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
 
 def get_base_domain(url: str) -> str:
 	try:
-		url_obj = urlparse(url)
+		url_obj = urlsplit(url)
 		result = f"{url_obj.scheme}://{url_obj.netloc}"
 	except ValueError as v:
 		print(f"ValueError encountered during get_base_domain. Likely bad URL: {v}")
@@ -138,7 +179,7 @@ def get_urls_from_html(html: str, base_url: str) -> list[str]:
 	return [urljoin(base_url, link["href"]) for link in BeautifulSoup(html, 'html.parser').find_all('a')]
 
 def normalize_url(url: str) -> str:
-	url_obj = urlparse(url)
+	url_obj = urlsplit(url)
 	return url_obj.netloc + url_obj.path.rstrip('/')
 
 def get_html(url: str) -> str:
