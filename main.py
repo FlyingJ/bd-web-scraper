@@ -13,7 +13,7 @@ def main():
         print(f"starting crawl of: {url}")
         site_data = crawl.crawl_page(url, url)
         print(f"Found {len(site_data)} pages")
-        print(site_data)
+        # print(site_data)
 
 if __name__ == "__main__":
     main()

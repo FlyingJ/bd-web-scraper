@@ -24,21 +24,37 @@ class AsyncCrawler():
 	async def __aexit__(self, exc_type, exc_val, exc_tb):
 		await self.session.close()
 
-	async def add_page_visit(self,normalized_url):
-		async with self.lock:
-			return normalized_url not in self.site_data
+	async def add_page_visit(self, normalized_url):
+		try:
+			if self.lock is None:
+				raise Exception('no lock allocated in AsyncCrawler object')
+			if not self.site_data:
+				raise Exception('no site data found in AsyncCrawler object')
+			async with self.lock:
+				return normalized_url not in self.site_data
+		except Exception as e:
+			print(f"Exception caught: {e}")
+			return None
 
 	async def get_html(self, url):
-		headers = {
-			"User-Agent": "BootCrawler/1.0",
-		}
-		async with self.session.get(url, headers=headers) as response:
-			if response.status >= 400:
-				raise Exception(f"HTTP error status: {response.status}")
-			if not response.headers["content-type"].startswith("text/html"):
-				raise Exception(f'response has incorrect Content-Type: {response.headers["content-type"]}')
-			print(f"Fetched page: {url}")
-			return await response.text()
+		try:
+			headers = {
+				"User-Agent": "BootCrawler/1.0",
+			}
+			if self.session is None:
+				return None
+			async with self.session.get(url, headers=headers) as response:
+				if response.status >= 400:
+					raise Exception(f"HTTP error status: {response.status} {response.reason}")
+				if "content-type" not in response.headers:
+					raise Exception("Content-Type header missing from response")
+				if "text/html" not in response.headers.get("content-type", ""):
+					raise Exception(f'incorrect Content-Type: {response.headers.get("content-type", "")}')
+				# print(f"Fetched page: {url}")
+				return await response.text()
+		except Exception as e:
+			print(f"Exception caught: {e}")
+			return None
 
 class PageData(TypedDict):
     url: str
@@ -56,33 +72,46 @@ def crawl_page(
 		site_data = {}
 	
 	if not current_url.startswith(base_url):
-		print(f"SKIP: {current_url} outside {base_url}")
+		# print(f"SKIP: {current_url} outside {base_url}")
 		return site_data
 
-	norm_current_url = normalize_url(current_url)
-	if norm_current_url not in site_data:
-		print(f"CACHE MISS: {norm_current_url}")
-		page_data = extract_page_data(get_html(current_url), current_url)
-		site_data[norm_current_url] = page_data
-		for link in page_data["outgoing_links"]:
-			print(f"FOUND ANOTHER PAGE: {link}")
+	normalized_url = normalize_url(current_url)
+	if normalized_url not in site_data:
+		print(f"FETCH: {normalized_url}")
+		site_data[normalized_url] = extract_page_data(get_html(current_url), current_url)
+		for link in site_data[normalized_url]["outgoing_links"]:
+			# print(f"FOUND ANOTHER PAGE: {link}")
 			site_data = crawl_page(base_url, link, site_data)
-	else:
-		print(f"CACHE HIT: {norm_current_url}")
+	# else:
+	# 	print(f"CACHE HIT: {normalized_url}")
 	return site_data
 
 def extract_page_data(html: str, page_url: str) -> PageData:
-	obj = urlparse(page_url)
-	base_url = f'{obj.scheme}://{obj.netloc}'
+	base_domain = get_base_domain(page_url)
+	if base_domain is None:
+		return None
 	# print(f'Page URL: {page_url}')
 	# print(f'Base URL: {base_url}')
 	return {
 		"url": page_url,
 		"heading": get_heading_from_html(html),
 		"first_paragraph": get_first_paragraph_from_html(html),
-		"outgoing_links": get_urls_from_html(html, base_url),
-		"image_urls": get_images_from_html(html, base_url),
+		"outgoing_links": get_urls_from_html(html, base_domain),
+		"image_urls": get_images_from_html(html, base_domain),
 	}
+
+def get_base_domain(url: str) -> str:
+	try:
+		url_obj = urlparse(url)
+		result = f"{url_obj.scheme}://{url_obj.netloc}"
+	except ValueError as v:
+		print(f"ValueError encountered during get_base_domain. Likely bad URL: {v}")
+		result = None
+	except Exception as e:
+		print("Generic exception: {e}")
+		result = None
+	finally:
+		return result
 
 def get_first_paragraph_from_html(html: str) -> str:
 	result = "" # default return empty string
@@ -113,13 +142,19 @@ def normalize_url(url: str) -> str:
 	return url_obj.netloc + url_obj.path.rstrip('/')
 
 def get_html(url: str) -> str:
-	headers = {
-		"User-Agent": "BootCrawler/1.0",
-	}
-	result = requests.get(url, headers=headers)
-	if result.status_code >= 400:
-		result.raise_on_status()
-	if not result.headers["content-type"].startswith("text/html"):
-		raise Exception(f'response has incorrect Content-Type: {result.headers["content-type"]}')
-	print(f"Fetched page: {url}")
-	return result.text
+	try:
+		headers = {
+			"User-Agent": "BootCrawler/1.0",
+		}
+		response = requests.get(url, headers=headers)
+		if response.status_code >= 400:
+			raise Exception(f"HTTP error status: {response.status} {response.reason}")
+		if "content-type" not in response.headers:
+			raise Exception("Content-Type header missing from response")
+		if "text/html" not in response.headers.get("content-type", ""):
+			raise Exception(f'incorrect Content-Type: {response.headers.get("content-type", "")}')
+		# print(f"Fetched page: {url}")
+		return response.text
+	except Exception as e:
+		print(f"Exception caught: {e}")
+		return None
