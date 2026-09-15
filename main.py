@@ -2,21 +2,22 @@ import asyncio
 import crawl
 import sys
 
-MAX_CONCURRENCY=5
+from pprint import pprint
 
 async def main():
-    if len(sys.argv) < 2:
-        print("no website provided")
-        sys.exit(1)
-    elif len(sys.argv) > 2:
-        print("too many arguments provided")
+    if not len(sys.argv) == 4:
+        print("Usage:\n\tuv main.py URL MAX_CON MAX_PAGES\n")
         sys.exit(1)
     else:
-        url = sys.argv[1]
+        url = str(sys.argv[1])
+        max_concurrency = int(sys.argv[2])
+        max_pages = int(sys.argv[3])
         print(f"starting crawl of: {url}")
-        site_data = await crawl.crawl_site_async(url, MAX_CONCURRENCY)
+        print(f" - {max_concurrency} tasks")
+        print(f" - {max_pages} pages")
+        site_data = await crawl.crawl_site_async(url, max_concurrency, max_pages)
         for page_data in site_data.values():
-            print(page_data)
+            pprint(page_data)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(), debug=True)
