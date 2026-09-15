@@ -2,6 +2,7 @@ import asyncio
 import crawl
 import sys
 
+from json_report import write_json_report
 from pprint import pprint
 
 async def main():
@@ -16,8 +17,10 @@ async def main():
         print(f" - {max_concurrency} tasks")
         print(f" - {max_pages} pages")
         site_data = await crawl.crawl_site_async(url, max_concurrency, max_pages)
-        for page_data in site_data.values():
-            pprint(page_data)
+        if write_json_report(site_data):
+            print("Great Success!!!")
+        else:
+            print("I have failed to succeed in the modest task which was my charge...")
 
 if __name__ == "__main__":
     asyncio.run(main(), debug=True)
